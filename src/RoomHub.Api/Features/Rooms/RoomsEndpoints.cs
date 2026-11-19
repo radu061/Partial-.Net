@@ -1,4 +1,4 @@
-﻿using RoomHub.Api.Features.Rooms.CreateRoom;
+using RoomHub.Api.Features.Rooms.CreateRoom;
 using RoomHub.Api.Features.Rooms.GetRoom;
 
 namespace RoomHub.Api.Features.Rooms;

@@ -1,4 +1,4 @@
-﻿using RoomHub.Api.Features.Bookings.CancelBooking;
+using RoomHub.Api.Features.Bookings.CancelBooking;
 using RoomHub.Api.Features.Bookings.CreateBooking;
 using RoomHub.Api.Features.Bookings.GetBooking;
 

@@ -23,9 +23,9 @@ public class BookingService(RoomRepository rooms, BookingRepository bookings)
         if (attendees > room.Capacity)
             throw new BusinessException("AttendeesExceedCapacity", "The room does not have enough seats.", 400);
 
-        foreach (var existing in bookings.ListForRoom(roomId))
+        foreach (var existing in bookings.ListForRoom(roomId).Where(b => b.Status == BookingStatus.Active))
         {
-            if (existing.StartUtc <= endUtc && startUtc <= existing.EndUtc)
+            if (existing.StartUtc < endUtc && startUtc < existing.EndUtc)
                 throw new BusinessException("RoomOccupied", "The room is occupied in this interval.", 409);
         }
 

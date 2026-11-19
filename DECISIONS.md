@@ -57,10 +57,7 @@ POST /api/rooms/{roomId}/bookings
 -> `TypedResults.Created("/api/bookings/{id}", Response)` -> 201
 
 ## 5. What you rejected from what the AI gave you
-(Write your own example here. It has to be something that really happened in your exam.)
-Examples of the kind of thing to write if it is true for you:
-- the AI made `Booking` a child of `Room` (`room.Bookings`), but the contract has `GET /api/bookings/{id}` and `POST /api/bookings/{id}/cancel`, so I made `Booking` its own aggregate with its own repository;
-- the AI returned too many attendees as 409, but R4 is validation, so I made it a 400.
+The Ai tried to make an enum in an already existing class so i refactored the new enum in its own file
 
 ## 6. If you had 30 more minutes
 I would add automated tests for the domain (`Booking.Create` with a fixed `nowUtc`, touching intervals, exactly 4 hours and exactly 2 hours, the third booking on one day, cancelling exactly 60 minutes before the start) and replace `EnsureCreated` with real migrations. Remaining risks: two simultaneous requests could both pass the overlap check or the R9 daily limit before either saves (a race condition, with no database-level constraint to stop it). Also, `GetActiveForParticipantAsync` loads all active bookings of a participant and the day is filtered in memory, which is fine for a small exam project but would not scale, and `bookedBy` is compared case-sensitively, so "Ana" and "ana" count as two different people.

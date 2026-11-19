@@ -1,4 +1,4 @@
-﻿namespace RoomHub.Api.Domain.Common;
+namespace RoomHub.Api.Domain.Common;
 
 public enum ErrorType
 {

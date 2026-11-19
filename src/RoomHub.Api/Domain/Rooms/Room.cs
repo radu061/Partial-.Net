@@ -4,6 +4,10 @@ namespace RoomHub.Api.Domain.Rooms;
 
 public sealed class Room
 {
+    public const int LargeRoomThreshold = 10;
+    public static readonly TimeSpan MaxBookingForSmallRoom = TimeSpan.FromHours(4);  // R6
+    public static readonly TimeSpan MaxBookingForLargeRoom = TimeSpan.FromHours(2);  // R10
+
     private Room()
     {
     }
@@ -12,7 +16,11 @@ public sealed class Room
     public string Name { get; private set; } = string.Empty;
     public int Capacity { get; private set; }
 
-    
+    // R6 + R10: capacity > 10 -> 2 hours, otherwise 4 hours (exactly the limit is allowed).
+    public TimeSpan MaxBookingDuration =>
+        Capacity > LargeRoomThreshold ? MaxBookingForLargeRoom : MaxBookingForSmallRoom;
+
+    // R1
     public static Result<Room> Create(string? name, int capacity)
     {
         if (string.IsNullOrWhiteSpace(name))

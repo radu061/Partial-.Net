@@ -5,7 +5,8 @@ namespace RoomHub.Api.Domain.Bookings;
 
 public sealed class Booking
 {
-    public static readonly TimeSpan MaxDuration = TimeSpan.FromHours(4);
+    public const int MaxActiveBookingsPerDay = 2;                                // R9
+    public static readonly TimeSpan MinCancelNotice = TimeSpan.FromMinutes(60);  // R11
 
     private Booking()
     {
@@ -19,7 +20,8 @@ public sealed class Booking
     public BookingStatus Status { get; private set; }
 
     public bool IsActive => Status == BookingStatus.Active;
-    
+
+    // All booking rules R2-R10 live here. "now" is a parameter (R5: from TimeProvider).
     public static Result<Booking> Create(
         Room room,
         string? bookedBy,
@@ -27,6 +29,7 @@ public sealed class Booking
         DateTime endUtc,
         int attendees,
         IEnumerable<Booking> activeBookingsOfRoom,
+        IEnumerable<Booking> activeBookingsOfParticipant,
         DateTime nowUtc)
     {
         if (string.IsNullOrWhiteSpace(bookedBy))                                   // R2
@@ -46,28 +49,39 @@ public sealed class Booking
         if (range.StartUtc < nowUtc)                                               // R5
             return BookingErrors.StartInPast;
 
-        if (range.Duration > MaxDuration)                                          // R6 (exactly 4h is ok)
+        if (range.Duration > room.MaxBookingDuration)                              // R6 + R10
             return BookingErrors.TooLong;
 
         if (activeBookingsOfRoom.Any(b => b.IsActive && b.Range.Overlaps(range)))  // R7
             return BookingErrors.RoomOccupied;
 
+        var trimmedBookedBy = bookedBy.Trim();
+        var sameDayCount = activeBookingsOfParticipant.Count(b =>                  // R9
+            b.IsActive
+            && b.BookedBy == trimmedBookedBy
+            && b.Range.StartUtc.Date == range.StartUtc.Date);
+        if (sameDayCount >= MaxActiveBookingsPerDay)
+            return BookingErrors.DailyLimitExceeded;
+
         return new Booking
         {
             Id = Guid.NewGuid(),
             RoomId = room.Id,
-            BookedBy = bookedBy.Trim(),
+            BookedBy = trimmedBookedBy,
             Range = range,
             Attendees = attendees,
             Status = BookingStatus.Active
         };
     }
 
-    
-    public Result<Unit> Cancel()
+    // R8 + R11
+    public Result<Unit> Cancel(DateTime nowUtc)
     {
         if (Status == BookingStatus.Cancelled)
             return BookingErrors.AlreadyCancelled;
+
+        if (Range.StartUtc - nowUtc < MinCancelNotice)                             // R11 (exactly 60 min is ok)
+            return BookingErrors.TooLateToCancel;
 
         Status = BookingStatus.Cancelled;
         return Unit.Value;

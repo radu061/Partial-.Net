@@ -8,6 +8,6 @@ public sealed class RoomRepository(RoomHubDbContext db) : IRoomRepository
     public Task<Room?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         db.Rooms.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
-   
+    // Only marks the entity; IUnitOfWork.SaveChangesAsync writes it.
     public void Add(Room room) => db.Rooms.Add(room);
 }

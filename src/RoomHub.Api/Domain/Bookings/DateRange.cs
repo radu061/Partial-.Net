@@ -13,7 +13,7 @@ public sealed record DateRange
 
     public TimeSpan Duration => EndUtc - StartUtc;
 
-    
+    // R3
     public static Result<DateRange> Create(DateTime start, DateTime end)
     {
         var startUtc = ToUtc(start);
@@ -25,7 +25,7 @@ public sealed record DateRange
         return new DateRange { StartUtc = startUtc, EndUtc = endUtc };
     }
 
-    
+    // Half-open: touching intervals (10-12 and 12-14) do NOT overlap. (R7)
     public bool Overlaps(DateRange other) =>
         StartUtc < other.EndUtc && other.StartUtc < EndUtc;
 

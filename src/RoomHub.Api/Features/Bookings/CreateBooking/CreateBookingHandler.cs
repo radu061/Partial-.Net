@@ -28,6 +28,12 @@ public sealed class CreateBookingHandler(
 
         var activeBookings = await bookings.GetActiveForRoomAsync(room.Id, cancellationToken);
 
+        // R9: only the data is loaded here; the rule itself is in Booking.Create.
+        var bookedBy = command.BookedBy?.Trim();
+        IReadOnlyList<Booking> participantBookings = string.IsNullOrEmpty(bookedBy)
+            ? []
+            : await bookings.GetActiveForParticipantAsync(bookedBy, cancellationToken);
+
         var result = Booking.Create(
             room,
             command.BookedBy,
@@ -35,6 +41,7 @@ public sealed class CreateBookingHandler(
             command.EndUtc,
             command.Attendees,
             activeBookings,
+            participantBookings,
             time.GetUtcNow().UtcDateTime);
 
         if (result.IsFailure)

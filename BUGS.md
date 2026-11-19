@@ -16,4 +16,3 @@ Fill it in yourself, in your own words. There is no required number: what counts
 | R6 (max duration 4 hours) | Missing from `BookingService.Create`. | Same checklist. | Added in `Booking.Create` through `Room.MaxBookingDuration` (4 hours, or 2 hours for rooms over 10 seats after R10). Exactly the limit is still allowed. |
 | Persistence (data survives restart) | `Program.cs` registered in-memory repositories as singletons (`RoomRepository`, `BookingRepository`), so all data was lost on restart. | Reading `Program.cs`, and the comment "in-memory data" in the repositories. | EF Core + SQLite: `RoomHubDbContext`, configurations, repositories, `DatabaseInitializer`. |
 
-R9, R10 and R11 were new requirements given during the exam, not bugs in the starter, so they are not listed here.
